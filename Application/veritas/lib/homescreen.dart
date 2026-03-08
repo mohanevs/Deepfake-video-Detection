@@ -20,17 +20,26 @@ class Homescreen extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        scaffoldBackgroundColor: const Color(0xFFF4F6FA),
+        // primarySwatch: Colors.deepPurple,
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text("Screen Recorder"),
+          backgroundColor: Colors.white,
+          title: const Text(
+            "Veritas.ai",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 25,
+            ),
+          ),
           centerTitle: true,
           elevation: 0,
         ),
         body: Center(
           child: Card(
+            color: Colors.white,
             elevation: 10,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -40,12 +49,8 @@ class Homescreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.security,
-                    size: 80,
-                    color: Colors.deepPurple,
-                  ),
-                  const SizedBox(height: 20),
+                  Image.asset("assets/home.png", width: 150, height: 80),
+                  const SizedBox(height: 5),
 
                   const Text(
                     "Veritas.ai",
@@ -56,8 +61,13 @@ class Homescreen extends StatelessWidget {
 
                   const Text(
                     "Truth Over Illusion",
+
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontFamily: 'Poppins',
+                      fontSize: 15,
+                    ),
                   ),
 
                   const SizedBox(height: 30),
@@ -67,7 +77,14 @@ class Homescreen extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: startRecording,
                       icon: const Icon(Icons.select_all),
-                      label: const Text("Choose App"),
+                      label: const Text(
+                        "Choose App",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -84,7 +101,14 @@ class Homescreen extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: stopRecording,
                       icon: const Icon(Icons.stop),
-                      label: const Text("Stop Recording"),
+                      label: const Text(
+                        "Stop Recording",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orangeAccent,
                         padding: const EdgeInsets.symmetric(vertical: 14),
