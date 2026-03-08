@@ -1,4 +1,4 @@
-package com.example.mini_project
+package com.example.veritas
 
 import android.app.*
 import android.content.Context
