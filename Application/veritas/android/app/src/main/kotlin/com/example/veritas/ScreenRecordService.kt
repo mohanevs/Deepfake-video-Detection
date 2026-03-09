@@ -1,4 +1,9 @@
 package com.example.veritas
+import android.widget.TextView
+import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 
 import android.app.*
 import android.content.Context
@@ -62,6 +67,57 @@ class ScreenRecordService : Service() {
 
         return START_STICKY
     }
+
+    private fun showResultOverlay() {
+        Log.d("VERITAS", "Showing result overlay")
+        if (windowManager == null) {
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+    }
+
+    val textView = TextView(this)
+
+    textView.text = "Analyzing video..."
+    textView.setTextColor(Color.WHITE)
+    textView.textSize = 16f
+    textView.setPadding(40,20,40,20)
+
+    textView.setBackgroundColor(Color.BLACK)
+
+    val params = WindowManager.LayoutParams(
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        else
+            WindowManager.LayoutParams.TYPE_PHONE,
+        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+        PixelFormat.TRANSLUCENT
+    )
+
+    params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+    params.y = 250
+
+    windowManager?.addView(textView, params)
+
+    floatingView = textView
+
+    // simulate backend response
+    Handler(Looper.getMainLooper()).postDelayed({
+
+        val result = "REAL"   // later replace with API response
+
+       
+            textView.text = "Video Result: REAL ✓"
+            textView.setBackgroundColor(Color.parseColor("#2E7D32"))
+     Handler(Looper.getMainLooper()).postDelayed({
+            windowManager?.removeView(textView)
+            stopSelf()
+        }, 5000)
+
+    
+
+    }, 3000) // simulate backend processing
+}
 
     private fun startForegroundService() {
 
@@ -172,7 +228,7 @@ params.y = 1600
 
         imageView.setOnClickListener {
             stopRecording()
-            stopSelf()
+        
         }
 
 imageView.setOnTouchListener(object : View.OnTouchListener {
@@ -211,7 +267,7 @@ imageView.setOnTouchListener(object : View.OnTouchListener {
                 if (diffX < 10 && diffY < 10) {
                     // It's a click
                     stopRecording()
-                    stopSelf()
+                  
                 }
 
                 return true
@@ -226,6 +282,7 @@ imageView.setOnTouchListener(object : View.OnTouchListener {
     }
 
     private fun stopRecording() {
+        Log.d("VERITAS", "Stop recording triggered")
         try {
             mediaRecorder?.stop()
             mediaRecorder?.release()
@@ -236,6 +293,7 @@ imageView.setOnTouchListener(object : View.OnTouchListener {
                 windowManager?.removeView(it)
                 floatingView = null
             }
+             showResultOverlay() 
 
         } catch (e: Exception) {
             e.printStackTrace()
