@@ -1,24 +1,37 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision.models import resnet18
-import os
-from PIL import Image
-import numpy as np
-
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
+from torch.utils.data import Dataset, DataLoader
 
-# Define CNN+LSTM Model
+import os
+import cv2
+import numpy as np
+from PIL import Image
+
+import torchvision.transforms as transforms
+from torchvision.models import resnet18, ResNet18_Weights
+
+
+# =========================
+# DATASET PATH
+# =========================
+
+DATASET_PATH = r"E:\dataset\Deepfake Detection Dataset\Preprocessed_Dataset"
+
+
+# =========================
+# CNN + LSTM MODEL
+# =========================
+
 class CNNLSTMDeepfakeDetector(nn.Module):
-    def __init__(self, num_classes=2):
-        super(CNNLSTMDeepfakeDetector, self).__init__()
-        
-        # CNN backbone (ResNet18)
-        self.cnn = resnet18(pretrained=True)
-        self.cnn.fc = nn.Identity()  # Remove final layer
-        
-        # LSTM layers
+
+    def __init__(self):
+
+        super().__init__()
+
+        self.cnn = resnet18(weights=ResNet18_Weights.DEFAULT)
+        self.cnn.fc = nn.Identity()
+
         self.lstm = nn.LSTM(
             input_size=512,
             hidden_size=256,
@@ -26,163 +39,223 @@ class CNNLSTMDeepfakeDetector(nn.Module):
             batch_first=True,
             dropout=0.5
         )
-        
-        # Classification layers
-        self.fc = nn.Sequential(
-            nn.Linear(256, 128),
+
+        self.classifier = nn.Sequential(
+            nn.Linear(256,128),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(128, num_classes)
+            nn.Linear(128,2)
         )
-    
-    def forward(self, x):
-        # x shape: (batch_size, seq_len, 3, 224, 224)
-        batch_size, seq_len, c, h, w = x.size()
-        
-        # Extract CNN features for each frame
-        cnn_out = []
-        for i in range(seq_len):
-            frame = x[:, i, :, :, :]
-            features = self.cnn(frame)
-            cnn_out.append(features)
-        
-        # Stack features: (batch_size, seq_len, 512)
-        cnn_out = torch.stack(cnn_out, dim=1)
-        
-        # LSTM processing
-        lstm_out, (h_n, c_n) = self.lstm(cnn_out)
-        
-        # Use last hidden state
-        lstm_features = lstm_out[:, -1, :]
-        
-        # Classification
-        output = self.fc(lstm_features)
+
+    def forward(self,x):
+
+        batch, seq, c, h, w = x.shape
+
+        x = x.view(batch*seq, c, h, w)
+
+        features = self.cnn(x)
+
+        features = features.view(batch, seq, 512)
+
+        lstm_out,_ = self.lstm(features)
+
+        final = lstm_out[:,-1,:]
+
+        output = self.classifier(final)
+
         return output
 
 
-# Custom Dataset
-class DeepfakeDataset(Dataset):
-    def __init__(self, dataset_path, seq_len=10, img_size=224):
-        self.dataset_path = dataset_path
+# =========================
+# DATASET
+# =========================
+
+class DeepfakeVideoDataset(Dataset):
+
+    def __init__(self, dataset_path, seq_len=8):
+
         self.seq_len = seq_len
-        self.transform = transforms.Compose([
-            transforms.Resize((img_size, img_size)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                               std=[0.229, 0.224, 0.225])
-        ])
-        
-        self.samples = []
+
+        self.videos = []
         self.labels = []
-        
+
+        self.transform = transforms.Compose([
+            transforms.Resize((224,224)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485,0.456,0.406],
+                std=[0.229,0.224,0.225]
+            )
+        ])
+
+        real_path = os.path.join(dataset_path,"real")
+        fake_path = os.path.join(dataset_path,"fake")
+
         # Load real videos
-        real_path = os.path.join(dataset_path, 'real')
-        if os.path.exists(real_path):
-            for video_folder in os.listdir(real_path):
-                video_path = os.path.join(real_path, video_folder)
-                if os.path.isdir(video_path):
-                    self.samples.append(video_path)
-                    self.labels.append(0)
-        
+        for v in os.listdir(real_path):
+            if v.endswith((".mp4",".avi",".mov",".mkv")):
+                self.videos.append(os.path.join(real_path,v))
+                self.labels.append(0)
+
         # Load fake videos
-        fake_path = os.path.join(dataset_path, 'fake')
-        if os.path.exists(fake_path):
-            for video_folder in os.listdir(fake_path):
-                video_path = os.path.join(fake_path, video_folder)
-                if os.path.isdir(video_path):
-                    self.samples.append(video_path)
-                    self.labels.append(1)
-    
+        for v in os.listdir(fake_path):
+            if v.endswith((".mp4",".avi",".mov",".mkv")):
+                self.videos.append(os.path.join(fake_path,v))
+                self.labels.append(1)
+
+        print("Videos loaded:",len(self.videos))
+
+
     def __len__(self):
-        return len(self.samples)
-    
+        return len(self.videos)
+
+
+    def extract_frames(self, video_path):
+
+        cap = cv2.VideoCapture(video_path)
+
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        indices = np.linspace(
+            0,
+            max(total_frames-1,0),
+            self.seq_len,
+            dtype=int
+        )
+
+        frames = []
+        frame_id = 0
+        index_set = set(indices)
+
+        while True:
+
+            ret, frame = cap.read()
+
+            if not ret:
+                break
+
+            if frame_id in index_set:
+
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                frame = Image.fromarray(frame)
+
+                frame = self.transform(frame)
+
+                frames.append(frame)
+
+            frame_id += 1
+
+        cap.release()
+
+        if len(frames) == 0:
+            frames = [torch.zeros(3,224,224)]
+
+        while len(frames) < self.seq_len:
+            frames.append(frames[-1])
+
+        frames = torch.stack(frames)
+
+        return frames
+
+
     def __getitem__(self, idx):
-        video_path = self.samples[idx]
+
+        video_path = self.videos[idx]
+
         label = self.labels[idx]
-        
-        # Get frame files
-        frames = sorted([f for f in os.listdir(video_path) if f.endswith(('.jpg', '.png'))])
-        
-        # Select seq_len frames uniformly
-        if len(frames) >= self.seq_len:
-            indices = np.linspace(0, len(frames) - 1, self.seq_len, dtype=int)
-        else:
-            indices = list(range(len(frames))) + [len(frames) - 1] * (self.seq_len - len(frames))
-        
-        # Load and transform frames
-        frame_tensors = []
-        for i in indices:
-            frame_path = os.path.join(video_path, frames[i])
-            img = Image.open(frame_path).convert('RGB')
-            img_tensor = self.transform(img)
-            frame_tensors.append(img_tensor)
-        
-        # Stack frames: (seq_len, 3, 224, 224)
-        frames_tensor = torch.stack(frame_tensors)
-        
-        return frames_tensor, torch.tensor(label, dtype=torch.long)
+
+        frames = self.extract_frames(video_path)
+
+        return frames, torch.tensor(label)
 
 
-# Training
+# =========================
+# TRAINING
+# =========================
+
 def train():
-    # Hyperparameters
-    dataset_path = './datasets'  # Update with your dataset path
-    batch_size = 4
-    learning_rate = 1e-4
-    num_epochs = 1
-    
-    # Device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f'Using device: {device}')
-    
-    # Create model
-    model = CNNLSTMDeepfakeDetector(num_classes=2)
-    model = model.to(device)
-    
-    # Dataset and DataLoader
-    dataset = DeepfakeDataset(dataset_path)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
-    
-    # Loss and optimizer
+
+    batch_size = 2
+    epochs = 1
+    lr = 1e-4
+
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() else "cpu"
+    )
+
+    print("Using device:",device)
+
+    dataset = DeepfakeVideoDataset(DATASET_PATH)
+
+    dataloader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=4
+    )
+
+    model = CNNLSTMDeepfakeDetector().to(device)
+
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    
-    # Training loop
-    for epoch in range(num_epochs):
+
+    optimizer = optim.Adam(model.parameters(),lr=lr)
+
+    for epoch in range(epochs):
+
+        print("\n==============================")
+        print(f"Starting Epoch {epoch+1}/{epochs}")
+        print("==============================\n")
+
         model.train()
+
         total_loss = 0
         correct = 0
         total = 0
-        
-        for batch_idx, (frames, labels) in enumerate(dataloader):
+
+        for batch_idx,(frames,labels) in enumerate(dataloader):
+
+            print(f"Epoch {epoch+1} | Batch {batch_idx+1}/{len(dataloader)}")
+
             frames = frames.to(device)
             labels = labels.to(device)
-            
-            # Forward pass
+
             optimizer.zero_grad()
+
             outputs = model(frames)
-            loss = criterion(outputs, labels)
-            
-            # Backward pass
+
+            loss = criterion(outputs,labels)
+
             loss.backward()
+
             optimizer.step()
-            
+
             total_loss += loss.item()
-            _, predicted = torch.max(outputs.data, 1)
+
+            _,predicted = torch.max(outputs,1)
+
             total += labels.size(0)
+
             correct += (predicted == labels).sum().item()
-            
-            if (batch_idx + 1) % 10 == 0:
-                print(f'Epoch {epoch+1}, Batch {batch_idx+1}, Loss: {loss.item():.4f}')
-        
-        avg_loss = total_loss / len(dataloader)
-        accuracy = 100 * correct / total
-        print(f'Epoch {epoch+1} - Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%')
-    
-    # Save model
-    torch.save(model.state_dict(), 'deepfake_detector.pth')
-    print('Model saved as deepfake_detector.pth')
+
+            print("Batch Loss:",round(loss.item(),4))
+            print("--------------------------")
+
+        acc = 100 * correct / total
+
+        print("\nEpoch Completed")
+        print("Average Loss:",round(total_loss,4))
+        print("Accuracy:",round(acc,2),"%\n")
+
+    torch.save(model.state_dict(),"deepfake_detector.pth")
+
+    print("Model saved as deepfake_detector.pth")
 
 
-if __name__ == '__main__':
+# =========================
+# RUN
+# =========================
+
+if __name__ == "__main__":
+
     train()
