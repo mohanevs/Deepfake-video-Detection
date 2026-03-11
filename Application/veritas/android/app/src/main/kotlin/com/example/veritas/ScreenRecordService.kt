@@ -107,7 +107,7 @@ class ScreenRecordService : Service() {
         val result = "REAL"   // later replace with API response
 
        
-            textView.text = "Video Result: REAL ✓"
+            textView.text = "Video Result: REAL Video ✓"
             textView.setBackgroundColor(Color.parseColor("#2E7D32"))
      Handler(Looper.getMainLooper()).postDelayed({
             windowManager?.removeView(textView)
