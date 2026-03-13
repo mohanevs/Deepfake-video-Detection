@@ -61,6 +61,8 @@ class DeepFakeDataset(Dataset):
 # ===============================
 
 def main():
+    
+    os.makedirs("saved_models", exist_ok=True)
 
     # ===============================
     # Dataset Path
@@ -161,7 +163,7 @@ def main():
     # Training Loop
     # ===============================
 
-    EPOCHS = 1
+    EPOCHS = 15
 
     for epoch in range(EPOCHS):
 
@@ -213,10 +215,10 @@ def main():
     # Save Model Checkpoint
     # ===============================
 
-    model_path = f"saved_models/deepfake_model_epoch_{epoch+1}.pth"
+    model_path = f"saved_models/deepfake_model_epoch_{EPOCHS}.pth"
 
     torch.save({
-        'epoch': epoch + 1,
+        'epoch': EPOCHS,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': running_loss,
