@@ -209,6 +209,20 @@ def main():
         print(f"Training Loss: {running_loss:.4f}")
         print(f"Training Accuracy: {train_acc:.2f}%")
 
+    # ===============================
+    # Save Model Checkpoint
+    # ===============================
+
+    model_path = f"saved_models/deepfake_model_epoch_{epoch+1}.pth"
+
+    torch.save({
+        'epoch': epoch + 1,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': running_loss,
+    }, model_path)
+
+    print(f"Model saved to {model_path}")
 
     # ===============================
     # Evaluation
