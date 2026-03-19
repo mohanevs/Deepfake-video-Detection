@@ -68,7 +68,7 @@ def main():
     # Dataset Path
     # ===============================
 
-    dataset_root = r"E:\dataset\Deepfake Detection Dataset\frames_dataset"
+    dataset_root = r"E:\dataset\Deepfake Detection Dataset\3. frames_dataset"
 
     samples = []
 
