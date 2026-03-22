@@ -21,7 +21,7 @@ class Homescreen extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // primarySwatch: Colors.deepPurple,
-        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        scaffoldBackgroundColor: Colors.grey[200],
       ),
       home: Scaffold(
         appBar: AppBar(
