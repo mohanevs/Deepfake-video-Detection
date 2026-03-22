@@ -40,3 +40,7 @@ pretrained/best_model-v3.pt
 pretrained/efficientnet-b0-ffpp-c23.pt
 pretrained/model_97_acc_100_frames_FF_data.pt
 pretrained/vit_deepfake_model
+pretrained/best_model.pth
+
+saved_models/
+saved_models_xceptionet/
