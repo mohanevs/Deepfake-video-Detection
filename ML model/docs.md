@@ -1632,3 +1632,44 @@ Test AUC : 0.6472
 Val AUC  : 0.8974
 
 ✓ All plots saved to saved_models
+
+
+
+---
+🔍 So What Did the Original Author Do?
+
+There are only 3 possible ways they handled videos:
+
+🔹 1. Frame-wise Prediction + Aggregation (MOST COMMON ✅)
+
+Pipeline:
+
+Video → Frames → CNN → Predictions per frame → Aggregate → Final output
+Example:
+Frame1 → 0.91 (fake)
+Frame2 → 0.85 (fake)
+Frame3 → 0.40 (real)
+...
+
+Then:
+
+Average
+Majority vote
+Max confidence
+
+👉 Final decision = video-level prediction
+
+🔹 2. Frame Sampling (Single Frame)
+Video → pick 1 frame → CNN → output
+
+❌ Less accurate
+✔ Simple
+
+🔹 3. Feature Aggregation (Advanced)
+Frames → CNN features → LSTM/Pooling → Classifier
+
+👉 This is what YOU did with:
+
+EfficientNet + LSTM ✅
+
+--- 
