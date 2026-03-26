@@ -6,10 +6,11 @@ import cv2
 import os
 from PIL import Image
 
+def metaLearner():
+    lr = joblib.load(r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\ensemble_prediction_system\meta_model_lr.pkl")
+    return lr
 
-lr = joblib.load("meta_model_lr.pkl")
-
-def detect_deepfake(frames_folder):
+def detectDeepfake(frames_folder):
 
     pipe1, pipe2, pipe3, pipe4, model5 = load_models()
     
@@ -73,7 +74,7 @@ def detect_deepfake(frames_folder):
     
     return final_list
     
-def extract_frame(video_path, output_folder):
+def extractFrame(video_path, output_folder):
     
     os.makedirs(output_folder, exist_ok=True)
 
@@ -105,8 +106,9 @@ if __name__ == "__main__" :
     
     video_path = r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\Ensemble_prediction_system\Realistic_Deepfake_Video_Generation.mp4"
     output_path = r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\Ensemble_prediction_system\user_video"
-    frame_folder = extract_frame(video_path,output_path)
-    model_output = detect_deepfake(frame_folder)
+    frame_folder = extractFrame(video_path,output_path)
+    model_output = detectDeepfake(frame_folder)
+    lr = metaLearner()
     pred = lr.predict(model_output)
     print(pred)
     
