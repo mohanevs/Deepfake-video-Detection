@@ -13,27 +13,68 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from PIL import Image
+from torchvision import transforms
+import torch.nn.functional as F
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
+])
+
+# Load models
+
+# efficientnet-b0-ffpp-c23
+model1 = torch.load("efficientnet-b0-ffpp-c23.pt", map_location=device, weights_only=False)
+model1.eval()
+model1.to(device)
+print("Model loaded successfully!")
+
 
 def preprocess(video_path):
-    # Here process the video to the scale it to the shape that efficient required and all rest and returnthe preprocessed video 
+    frames = []
 
-def predict(model,video_path):
-    
-    # Preprocess the video frames to models input shape
-    video = preprocess(video_path)
-    #continue this
-    
-    return predictions
+    for file in sorted(os.listdir(video_path)):
+        img_path = os.path.join(video_path, file)
+
+        img = Image.open(img_path).convert("RGB")
+        img = transform(img)
+
+        frames.append(img)
+
+    return frames
+
+def predict(model, video_path):
+
+    frames = preprocess(video_path)
+
+    confidences = []
+
+    for frame in frames:
+        frame = frame.unsqueeze(0).to(device)  # (1, C, H, W)
+
+        with torch.no_grad():
+            output = model(frame)
+            probs = F.softmax(output, dim=1)
+
+        conf = probs[0][1].item()  # probability of FAKE class
+        confidences.append(conf)
+
+    # Aggregate (average)
+    avg_conf = sum(confidences) / len(confidences)
+
+    pred = 1 if avg_conf > 0.5 else 0
+    return pred, avg_conf
 
 def model1_predict(video_path): 
-    # efficientnet-b0-ffpp-c23
-    # Load the model
-    model = torch.load("efficientnet-b0-ffpp-c23.pt", map_location=device, weights_only=False)
-    model.eval()
-    model.to(device)
-    print("Model loaded successfully!")
-    
-    result = predict(model,video_path)
+    result = predict(model1,video_path)
     return result
 
 def model2_predict(video_path):

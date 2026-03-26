@@ -1,4 +1,4 @@
-'''import torch
+import torch
 import torch.nn as nn
 from torchvision import models
 
@@ -17,15 +17,15 @@ model.classifier[1] = nn.Linear(model.classifier[1].in_features, 2)
 model.load_state_dict(state_dict)
 model.to(device)
 model.eval()
-torch.save(model, "efficientnet-b0-ffpp-c23.pt")'''
+torch.save(model, "efficientnet-b0-ffpp-c23.pt")
 
-from transformers import ViTForImageClassification, ViTImageProcessor
+# from transformers import ViTForImageClassification, ViTImageProcessor
 
-model = ViTForImageClassification.from_pretrained("prithivMLmods/Deep-Fake-Detector-v2-Model")
-processor = ViTImageProcessor.from_pretrained("prithivMLmods/Deep-Fake-Detector-v2-Model")
+# model = ViTForImageClassification.from_pretrained("prithivMLmods/Deep-Fake-Detector-v2-Model")
+# processor = ViTImageProcessor.from_pretrained("prithivMLmods/Deep-Fake-Detector-v2-Model")
 
-# save locally
-model.save_pretrained("vit_deepfake_model")
-processor.save_pretrained("vit_deepfake_model")
+# # save locally
+# model.save_pretrained("vit_deepfake_model")
+# processor.save_pretrained("vit_deepfake_model")
 
-print("Model saved offline.")
+# print("Model saved offline.")
