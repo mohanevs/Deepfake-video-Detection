@@ -14,7 +14,7 @@ ALLOWED_VIDEO_TYPES = [
 ]
 
 
-async def validate_video(file: UploadFile):
+async def validate_video(file: UploadFile = File(...)):
     if file.content_type not in ALLOWED_VIDEO_TYPES:
         raise HTTPException(
             status_code=400,
@@ -23,7 +23,7 @@ async def validate_video(file: UploadFile):
     return file
 
 @app.post("/predict", status_code= status.HTTP_201_CREATED)
-async def predict_video(file: UploadFile = File(...)):
+async def predict_video(file: UploadFile = Depends(validate_video)):
 
     
     with tempfile.NamedTemporaryFile(delete=True, suffix=".mp4") as temp_video:
