@@ -1,8 +1,20 @@
 from fastapi import FastAPI, File, UploadFile, Response, status, HTTPException, Depends
 import tempfile
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = ["*"] #the website which can access
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 ALLOWED_VIDEO_TYPES = [
