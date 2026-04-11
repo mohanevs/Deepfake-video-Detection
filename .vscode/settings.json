@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./ML model/custom_cnn_lstm_model",
+        "./ML model/ensemble_prediction_system"
+    ]
+}
