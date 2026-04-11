@@ -248,20 +248,7 @@ export default function Analyze() {
               </span>
             </div>
 
-            {/* Confidence Bar */}
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem", marginBottom: "12px" }}>
-              Confidence Score:{" "}
-              <span style={{ color: "#fff", fontWeight: "600" }}>{result.confidence}%</span>
-            </p>
-            <div style={{ width: "100%", background: "rgba(255,255,255,0.06)", borderRadius: "9999px", height: "8px" }}>
-              <div style={{
-                width: `${result.confidence}%`, height: "8px", borderRadius: "9999px",
-                background: isDeepfake
-                  ? "linear-gradient(90deg, #ef4444, #f87171)"
-                  : "linear-gradient(90deg, #22c55e, #4ade80)",
-                transition: "width 1s cubic-bezier(0.16, 1, 0.3, 1)",
-              }} />
-            </div>
+
 
             {/* Extra stats from backend */}
             {(result.processing_time !== undefined || result.frame_count !== undefined) && (

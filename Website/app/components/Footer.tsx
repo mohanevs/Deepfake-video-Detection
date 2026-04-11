@@ -53,7 +53,7 @@ export default function Footer() {
             Open-source AI platform for advanced deepfake detection, temporal modeling, and frame-level spatial analysis.
           </p>
           <div style={{ marginTop: "32px", fontSize: "0.85rem", color: "rgba(255,255,255,0.25)" }}>
-            © {new Date().getFullYear()} Veritas.ai. Open-source under MIT License.
+            © {new Date().getFullYear()} Veritas.ai. All rights reserved.
           </div>
         </div>
 
