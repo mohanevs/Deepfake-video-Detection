@@ -1,6 +1,3 @@
 {
-    "python.analysis.extraPaths": [
-        "./ML model/custom_cnn_lstm_model",
-        "./ML model/ensemble_prediction_system"
-    ]
+    "cmake.sourceDirectory": "C:/Users/ASUS/Desktop/Mini Project/Deepfake-video-Detection/Application/veritas/linux"
 }
