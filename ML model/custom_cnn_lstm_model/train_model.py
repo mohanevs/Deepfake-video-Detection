@@ -16,6 +16,7 @@ import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 
 sys.path.append(r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\CNN_LSTM")
+# sys.path.append(r"C:\Users\ASUS\OneDrive\Desktop\kkkkk\Deepfake-video-Detection\ML model\custom_cnn_lstm_model")
 from model_efficientnet_b1 import DeepFakeDetector
 
 

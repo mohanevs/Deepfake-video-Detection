@@ -1,6 +1,7 @@
 import sys
 from transformers import AutoImageProcessor, AutoModelForImageClassification, pipeline
 sys.path.append(r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\custom_cnn_lstm_model")
+# sys.path.append(r"C:\Users\ASUS\OneDrive\Desktop\kkkkk\Deepfake-video-Detection\ML model\custom_cnn_lstm_model")
 from model_efficientnet_b1 import DeepFakeDetector
 import torch
 
@@ -12,6 +13,8 @@ if torch.cuda.is_available():
 
 path = r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\Ensemble_prediction_system\models\custom_trained.pth"
 model_path = r"C:\Users\ASUS\Desktop\Mini Project\Deepfake-video-Detection\ML model\ensemble_prediction_system\models"
+# path = r"C:\Users\ASUS\OneDrive\Desktop\kkkkk\Deepfake-video-Detection\ML model\ensemble_prediction_system\models\custom_trained.pth"
+# model_path = r"C:\Users\ASUS\OneDrive\Desktop\kkkkk\Deepfake-video-Detection\ML model\ensemble_prediction_system\models"
 
 
 def load_models():
