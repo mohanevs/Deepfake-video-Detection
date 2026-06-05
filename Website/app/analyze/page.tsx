@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://krishnashahu214-deepfake-video-detection.hf.space/";
 
 const Icon = ({ d, size = 20, className = "" }: { d: string; size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
